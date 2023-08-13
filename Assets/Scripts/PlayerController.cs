@@ -5,13 +5,18 @@ using UnityEngine.Serialization;
 
 public class PlayerController : MonoBehaviour
 {
-    [FormerlySerializedAs("walking_speed")] public float walkingSpeed;
-    [FormerlySerializedAs("jump_speed")] public float jumpSpeed;
-    public float gravity;
-
+    [SerializeField] float walkingSpeed;
+    [SerializeField] float jumpSpeed;
+    [SerializeField] bool inAir = true;
+    [SerializeField] Transform boxCollider;
+    [SerializeField] private ContactFilter2D filter2D;
+    [SerializeField] float gravity;
+    [SerializeField] float platformHeight;
+    
+    private Collider2D[] _results = new Collider2D[1];
     private float _direction;
-    [FormerlySerializedAs("in_air")] public bool inAir = true;
     private Vector2 _velocity;
+    
 
     // Start is called before the first frame update
     void Start()
@@ -25,40 +30,30 @@ public class PlayerController : MonoBehaviour
         _direction = Input.GetAxis("Horizontal");
 
         //rigid_body.velocity = new Vector2(walking_speed * direction, rigid_body.velocity.y);
-
-        
-
-        if (Input.GetButtonDown("Jump") && !inAir)
-        {
-            _velocity.y = jumpSpeed;
-            Debug.Log("Jump");
-        }
-
-        if (!inAir)
-        {
-            //Debug.Log("Collision");
-            _velocity.y = 0; // Reset vertical velocity when on the ground
-        }
-
+        _velocity.x = walkingSpeed * _direction;
         // Apply gravity
         _velocity.y -= gravity * Time.deltaTime;
 
-        transform.Translate(_velocity * Time.deltaTime);
-    }
-
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.gameObject.CompareTag("Platform"))
+        // Ground Collision Detection
+        if (Physics2D.OverlapBox(boxCollider.position, boxCollider.localScale, 0, filter2D, _results) > 0 && _velocity.y < 0)
         {
+            _velocity.y = 0;
+            Vector2 surface = Physics2D.ClosestPoint(transform.position, _results[0]) + Vector2.up * platformHeight;
+            transform.position = new Vector3(transform.position.x, surface.y, transform.position.z);
             inAir = false;
         }
-    }
-
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        if (other.gameObject.CompareTag("Platform"))
+        else
         {
             inAir = true;
         }
+
+        // Jump
+        if (Input.GetButtonDown("Jump") && !inAir)
+        {
+            _velocity.y = jumpSpeed;
+        }
+        
+        // Final movement
+        transform.Translate(_velocity * Time.deltaTime);
     }
 }
