@@ -5,47 +5,76 @@ using UnityEngine.Serialization;
 
 public class PlayerController : MonoBehaviour
 {
+    #region Variables
+
     [SerializeField] float walkingSpeed;
     [SerializeField] float jumpSpeed;
-    [SerializeField] bool inAir = true;
-    [SerializeField] Transform boxCollider;
-    [SerializeField] private ContactFilter2D filter2D;
     [SerializeField] float gravity;
-    [SerializeField] float platformHeight;
-    
-    private Collider2D[] _results = new Collider2D[1];
+    [SerializeField] private bool inAir = true;
     private float _direction;
     private Vector2 _velocity;
+    [SerializeField] private ContactFilter2D filter2D;
     
+    private Collider2D[] _resultsDown = new Collider2D[1];
+    private Collider2D[] _resultsUp = new Collider2D[1];
+    private Collider2D[] _resultsLeft = new Collider2D[1];
+    private Collider2D[] _resultsRight = new Collider2D[1];
+    
+    [SerializeField] Transform boxColliderDown;
+    [SerializeField] Transform boxColliderUp;
+    [SerializeField] Transform boxColliderLeft;
+    [SerializeField] Transform boxColliderRight;
 
-    // Start is called before the first frame update
+    #endregion
+    
+    
     void Start()
     {
 
     }
-
-    // Update is called once per frame
+    
     void Update()
     {
+        // Horizontal movement
         _direction = Input.GetAxis("Horizontal");
-
-        //rigid_body.velocity = new Vector2(walking_speed * direction, rigid_body.velocity.y);
         _velocity.x = walkingSpeed * _direction;
+        
         // Apply gravity
         _velocity.y -= gravity * Time.deltaTime;
 
-        // Ground Collision Detection
-        if (Physics2D.OverlapBox(boxCollider.position, boxCollider.localScale, 0, filter2D, _results) > 0 && _velocity.y < 0)
+        #region Collision
+
+        // Ground/Down Collision Detection
+        if (Physics2D.OverlapBox(boxColliderDown.position, boxColliderDown.localScale, 0, filter2D, _resultsDown) > 0 && _velocity.y < 0)
         {
             _velocity.y = 0;
-            Vector2 surface = Physics2D.ClosestPoint(transform.position, _results[0]) + Vector2.up * platformHeight;
-            transform.position = new Vector3(transform.position.x, surface.y, transform.position.z);
             inAir = false;
         }
         else
         {
             inAir = true;
         }
+        
+        // Up Collision Detection
+        if (Physics2D.OverlapBox(boxColliderUp.position, boxColliderUp.localScale, 0, filter2D, _resultsUp) > 0 && _velocity.y > 0)
+        {
+            _velocity.y = 0;
+        }
+        
+        // Left Collision Detection
+        if (Physics2D.OverlapBox(boxColliderLeft.position, boxColliderLeft.localScale, 90, filter2D, _resultsLeft) > 0 && _velocity.x < 0)
+        {
+            _velocity.x = 0;
+        }
+        
+        // Right Collision Detection
+        if (Physics2D.OverlapBox(boxColliderRight.position, boxColliderRight.localScale, 90, filter2D, _resultsRight) > 0 && _velocity.x > 0)
+        {
+            _velocity.x = 0;
+        }
+
+        #endregion
+        
 
         // Jump
         if (Input.GetButtonDown("Jump") && !inAir)
