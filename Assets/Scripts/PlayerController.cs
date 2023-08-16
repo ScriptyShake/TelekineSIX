@@ -7,24 +7,24 @@ public class PlayerController : MonoBehaviour
 {
     #region Variables
 
-    [SerializeField] float walkingSpeed;
-    [SerializeField] float jumpSpeed;
-    [SerializeField] float gravity;
-    [SerializeField] private bool inAir = true;
+    [SerializeField] private float walkingSpeed;
+    [SerializeField] private float jumpSpeed;
+    [SerializeField] private float gravity;
+    [Space]
+    [SerializeField] private Transform boxColliderDown;
+    [SerializeField] private Transform boxColliderUp;
+    [SerializeField] private Transform boxColliderLeft;
+    [SerializeField] private Transform boxColliderRight;
+    
+    private bool _inAir = true;
+    private ContactFilter2D _filter2D;
     private float _direction;
     private Vector2 _velocity;
-    [SerializeField] private ContactFilter2D filter2D;
-    
     private Collider2D[] _resultsDown = new Collider2D[1];
     private Collider2D[] _resultsUp = new Collider2D[1];
     private Collider2D[] _resultsLeft = new Collider2D[1];
     private Collider2D[] _resultsRight = new Collider2D[1];
     
-    [SerializeField] Transform boxColliderDown;
-    [SerializeField] Transform boxColliderUp;
-    [SerializeField] Transform boxColliderLeft;
-    [SerializeField] Transform boxColliderRight;
-
     #endregion
     
     
@@ -45,30 +45,30 @@ public class PlayerController : MonoBehaviour
         #region Collision
 
         // Ground/Down Collision Detection
-        if (Physics2D.OverlapBox(boxColliderDown.position, boxColliderDown.localScale, 0, filter2D, _resultsDown) > 0 && _velocity.y < 0)
+        if (Physics2D.OverlapBox(boxColliderDown.position, boxColliderDown.localScale, 0, _filter2D, _resultsDown) > 0 && _velocity.y < 0)
         {
             _velocity.y = 0;
-            inAir = false;
+            _inAir = false;
         }
         else
         {
-            inAir = true;
+            _inAir = true;
         }
         
         // Up Collision Detection
-        if (Physics2D.OverlapBox(boxColliderUp.position, boxColliderUp.localScale, 0, filter2D, _resultsUp) > 0 && _velocity.y > 0)
+        if (Physics2D.OverlapBox(boxColliderUp.position, boxColliderUp.localScale, 0, _filter2D, _resultsUp) > 0 && _velocity.y > 0)
         {
             _velocity.y = 0;
         }
         
         // Left Collision Detection
-        if (Physics2D.OverlapBox(boxColliderLeft.position, boxColliderLeft.localScale, 90, filter2D, _resultsLeft) > 0 && _velocity.x < 0)
+        if (Physics2D.OverlapBox(boxColliderLeft.position, boxColliderLeft.localScale, 90, _filter2D, _resultsLeft) > 0 && _velocity.x < 0)
         {
             _velocity.x = 0;
         }
         
         // Right Collision Detection
-        if (Physics2D.OverlapBox(boxColliderRight.position, boxColliderRight.localScale, 90, filter2D, _resultsRight) > 0 && _velocity.x > 0)
+        if (Physics2D.OverlapBox(boxColliderRight.position, boxColliderRight.localScale, 90, _filter2D, _resultsRight) > 0 && _velocity.x > 0)
         {
             _velocity.x = 0;
         }
@@ -77,7 +77,7 @@ public class PlayerController : MonoBehaviour
         
 
         // Jump
-        if (Input.GetButtonDown("Jump") && !inAir)
+        if (Input.GetButtonDown("Jump") && !_inAir)
         {
             _velocity.y = jumpSpeed;
         }
