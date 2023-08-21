@@ -102,7 +102,7 @@ MonoBehaviour:
   walkingSpeed: 10
   jumpSpeed: 20
   gravity: 50
-  gravityMultiplier: 1.5
+  gravityMultiplier: 2.5
   maxFallSpeed: 200
   _rigidbody2D: {fileID: 5750023624721284569}
 --- !u!50 &5750023624721284569
